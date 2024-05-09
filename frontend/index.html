@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word to PDF Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 185px;
+            background-color:black;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #edea0d;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        form {
+            text-align: center;
+        }
+
+        input[type="file"] {
+            display: block;
+            margin: 0 auto;
+            margin-bottom: 20px;
+        }
+
+        button[type="submit"] {
+            background-color: #0bd8f3;
+            color: #070707;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #10c0f1;
+        }
+
+        #downloadLinkContainer {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #downloadLink {
+            display: inline-block;
+            background-color: #f3780c;
+            color: #131212;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+
+        #downloadLink:hover {
+            background-color: #e68607;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Word to PDF Converter</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="fileInput" id="fileInput" required>
+            <button type="submit">Convert to PDF</button>
+        </form>
+
+        <div id="downloadLinkContainer" style="display: none;">
+            <a id="downloadLink" href="#" download>Download PDF</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a file.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/convertfile', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    // File converted successfully, show download link
+                    document.getElementById('downloadLinkContainer').style.display = 'block';
+                    // Set download link href to the converted PDF file path
+                    response.blob().then(blob => {
+                        const url = window.URL.createObjectURL(blob);
+                        document.getElementById('downloadLink').href = url;
+                    });
+                } else {
+                    // Handle error response
+                    alert('Error converting file. Please try again.');
+                }
+            })
+            .catch(error => {
+                // Handle network error
+                console.error('Error:', error);
+                alert('Error converting file. Please try again.');
+            });
+        });
+    </script>
+</body>
+</html>
